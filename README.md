@@ -80,13 +80,13 @@
 <body>
   <div id="player-container">
     <video id="video" class="video-js vjs-default-skin" controls autoplay playsinline preload="auto"
-      poster="https://gratuittv.free.nf/player/ag-66-4.png"></video>
+      poster="http://gratuittv.free.nf/player/ag-66-4.png"></video>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const url = params.get("url");
-    const fallbackVideo = "https://gratuittv.free.nf/video/Offtv.mp4";
+    const fallbackVideo = "http://gratuittv.free.nf/video/Offtv.mp4";
 
     const player = videojs('video', {
       controls: true,
@@ -114,7 +114,7 @@
     // --- Ajout du logo dans le player ---
     const logo = document.createElement('div');
     logo.className = 'vjs-logo';
-    logo.innerHTML = `<img src="https://gratuittv.free.nf/image/logo.png" alt="Logo GratuitTV">`;
+    logo.innerHTML = `<img src="http://gratuittv.free.nf/image/logo.png" alt="Logo GratuitTV">`;
     player.el().appendChild(logo);
 
     // --- Ajout du watermark dans le player ---
