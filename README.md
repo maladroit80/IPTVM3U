@@ -3,87 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-  <title>Lecteur IPTV</title>
+  <title>Lecteur GratuitTV - Multi Audio</title>
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+
+  <!-- Video.js -->
   <link href="https://cdn.jsdelivr.net/npm/video.js@8.22.0/dist/video-js.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/video.js@8.22.0/dist/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-http-streaming@2.16.0/dist/videojs-http-streaming.min.js"></script>
+
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
-    #player-container { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .video-js { width: 100% !important; height: 100% !important; }
-    
-    /* Style du Logo en haut à droite */
-    .vjs-logo { 
-      position: absolute; 
-      z-index: 10; 
-      top: 15px; 
-      right: 15px; 
-      pointer-events: none; 
-    }
-    .vjs-logo img { 
-      max-height: 50px; 
-      width: auto; 
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); /* Pour que le logo ressorte mieux */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: sans-serif;
     }
 
-    /* Style du Watermark en haut à gauche */
-    .vjs-watermark { 
-      position: absolute; 
-      z-index: 10; 
-      top: 15px; 
-      left: 15px; 
-      background: rgba(0,0,0,0.5); 
-      color: white; 
-      padding: 5px 12px; 
-      border-radius: 4px; 
-      font-family: sans-serif;
+    #player-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-js {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 100dvh;
+      background: #000;
+      object-fit: contain;
+    }
+
+    /* Logo et watermark intégrés au player */
+    .vjs-logo,
+    .vjs-watermark {
+      position: absolute;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .vjs-logo {
+      top: 10px;
+      right: 10px;
+    }
+
+    .vjs-logo img {
+      max-height: 40px;
+      width: auto;
+    }
+
+    .vjs-watermark {
+      top: 15px;
+      left: 15px;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .vjs-watermark a {
+      color: #0af;
       font-weight: bold;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div id="player-container">
-    <video id="video" class="video-js vjs-default-skin" controls autoplay playsinline preload="auto"></video>
+    <video id="video" class="video-js vjs-default-skin" controls autoplay playsinline preload="auto"
+      poster="https://raw.githubusercontent.com/maladroit80/IPTVM3U/master/ag-66-4.png"></video>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const url = params.get("url");
-
-    // ON UTILISE UN PROXY POUR LE FLUX ET LES IMAGES SI BESOIN
-    const finalUrl = url ? "https://api.allorigins.win/raw?url=" + encodeURIComponent(url) : "";
+    const fallbackVideo = "https://gratuittv.free.nf/video/Offtv.mp4";
 
     const player = videojs('video', {
-      autoplay: true,
       controls: true,
-      fluid: false
+      autoplay: true,
+      preload: 'auto',
+      playsinline: true,
+      fluid: false,
+      controlBar: {
+        children: [
+          'playToggle',
+          'volumePanel',
+          'currentTimeDisplay',
+          'timeDivider',
+          'durationDisplay',
+          'progressControl',
+          'remainingTimeDisplay',
+          'customControlSpacer',
+          'fullscreenToggle',
+          'subtitlesButton',
+          'audioTrackButton'
+        ]
+      }
     });
 
-    // --- AJOUT DU LOGO ---
+    // --- Ajout du logo dans le player ---
     const logo = document.createElement('div');
     logo.className = 'vjs-logo';
-    // Utilisation d'un logo de test qui fonctionne partout (on pourra changer l'adresse après)
-    logo.innerHTML = `<img src="https://raw.githubusercontent.com/maladroit80/IPTVM3U/master/logo.png" onerror="this.src='https://via.placeholder.com/150x50/000000/FFFFFF?text=TV+LIVE'" alt="Logo">`;
+    logo.innerHTML = `<img src="https://raw.githubusercontent.com/maladroit80/IPTVM3U/master/logo.png" alt="Logo GratuitTV">`;
     player.el().appendChild(logo);
 
-    // --- AJOUT DU WATERMARK ---
+    // --- Ajout du watermark dans le player ---
     const watermark = document.createElement('div');
     watermark.className = 'vjs-watermark';
-    watermark.innerHTML = `DIRECT TV`;
+    watermark.innerHTML = `<a href="http://gratuittv.free.nf" target="_blank">GratuitTV</a>`;
     player.el().appendChild(watermark);
 
-    // Chargement du flux
-    if (url) {
-        player.src({ src: finalUrl, type: 'application/x-mpegURL' });
+    // --- Charger le flux vidéo ---
+    player.src({
+      src: url || fallbackVideo,
+      type: url ? 'application/x-mpegURL' : 'video/mp4'
+    });
+
+    // --- Ajustement dynamique de la hauteur visible ---
+    function resizePlayer() {
+      const container = document.getElementById('player-container');
+      container.style.height = window.innerHeight + 'px';
     }
 
-    player.on('error', function() {
-       if(url) {
-          // Deuxième chance avec un autre proxy si le premier échoue
-          player.src({
-            src: "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url),
-            type: 'application/x-mpegURL'
-          });
-       }
+    window.addEventListener('resize', resizePlayer);
+    window.addEventListener('orientationchange', resizePlayer);
+    resizePlayer();
+
+    // --- Gestion des erreurs ---
+    player.on('error', () => {
+      console.warn("Erreur flux HLS, fallback activé");
+      player.src({ src: fallbackVideo, type: 'video/mp4' });
+      player.play().catch(()=>{});
     });
   </script>
 </body>
