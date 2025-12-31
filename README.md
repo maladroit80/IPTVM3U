@@ -86,7 +86,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const url = params.get("url");
-    const fallbackVideo = "https://gratuittv.free.nf/video/Offtv.mp4";
+    const fallbackVideo = "http://gratuittv.free.fr/video/Offtv.mp4";
 
     const player = videojs('video', {
       controls: true,
@@ -120,7 +120,7 @@
     // --- Ajout du watermark dans le player ---
     const watermark = document.createElement('div');
     watermark.className = 'vjs-watermark';
-    watermark.innerHTML = `<a href="http://gratuittv.free.nf" target="_blank">GratuitTV</a>`;
+    watermark.innerHTML = `<a href="http://gratuittv.free.fr" target="_blank">GratuitTV</a>`;
     player.el().appendChild(watermark);
 
     // --- Charger le flux vidéo ---
